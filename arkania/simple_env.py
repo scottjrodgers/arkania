@@ -75,7 +75,7 @@ class Tileset:
     def __init__(self):
         self.tiles = []
         for i in range(1, 25 + 1):
-            fname = f"graphics/sprites/Simple_Tiles{i}.png"
+            fname = f"arkania/graphics/sprites/Simple_Tiles{i}.png"
             self.tiles.append(pyglet.image.load(fname))
 
     def draw(self, viewer, tile_id, x, y, offset_x=0, offset_y=0, light=1.0):
@@ -207,6 +207,8 @@ class Agent:
         return 0
 
     def step(self):
+        if self.energy < 0:
+            self.energy = 0
         self.age += 1
         self.water -= 1
         self.food -= 1
@@ -336,12 +338,14 @@ class Agent:
                 if self.water > 100:
                     self.health -= (self.water - 100) / 2
                     self.energy -= (self.water - 100) / 2
+                    self.water = 100
             elif type(self.in_hand) == Food:
                 self.in_hand = None
                 self.food += 35
                 if self.food > 100:
-                    self.health -= (self.food - 100)
-                    self.energy -= (self.food - 100)
+                    self.health -= (self.food - 100) / 2
+                    self.energy -= (self.food - 100) / 2
+                    self.food = 100
             elif type(self.in_hand) == Stone:
                 self.health -= 45
                 self.energy -= 45
@@ -367,7 +371,7 @@ class Agent:
             self.energy += 3
         else:
             self.health += 0
-            self.energy += 1
+            self.energy += 2
         if self.health > 100:
             self.health = 100
         if self.energy > 100:
@@ -560,7 +564,7 @@ class SimpleEnv(gym.Env):
         reward = 1
         is_done = False
         if self.agent.health <= 0:
-            reward = self.agent.age - 1000
+            reward = -1000
             is_done = True
         return state, reward, is_done, debug
 
@@ -758,62 +762,3 @@ class SimpleEnv(gym.Env):
         """
         clean up memory and resources
         """
-
-
-def human_interface():
-    """
-        For a human user interface we could do:
-          W = move north
-          A = move west
-          S = move south
-          D = move east
-          E = pick up
-          X = put down
-          C = consume
-          R = rest
-          Up-Arrow = throw north
-          Left-Arrow = throw west
-          Down-Arrow = throw south
-          Right-Arrow throw east
-    """
-    import keyboard
-    env = SimpleEnv()
-    env.reset()
-    env.render()
-
-    # Turn this off before committing
-    debugging = False
-
-    done = False
-    while not done:
-        env.render()
-        time.sleep(0.15)
-
-        action = 0
-        ch = keyboard.read_key()
-        print(f"getch -> ({ch})")
-
-        if ch == 'esc': break
-        if ch == 'w': action = 1
-        if ch == 'd': action = 2
-        if ch == 's': action = 3
-        if ch == 'a': action = 4
-        if ch == 'e': action = 5
-        if ch == 'x': action = 6
-        if ch == 'c': action = 7
-        if ch == 'up': action = 8
-        if ch == 'right': action = 9
-        if ch == 'down': action = 10
-        if ch == 'left': action = 11
-
-        state, reward, done, debug_info = env.step(action)
-
-        if debugging:
-            print(f"agent: ({env.agent.x}, {env.agent.y})")
-            print(state['sight'])
-
-    env.viewer.close()
-
-
-if __name__ == "__main__":
-    human_interface()

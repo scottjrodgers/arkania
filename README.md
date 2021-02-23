@@ -3,6 +3,16 @@ A rich, complex, 2d grid-based world for multi-agent reinforcement learning deve
 A future version may become a continuous world.
 
 
+## Current Status:
+* A simple, discrete environment is working, I believe.
+* A detailed description of the action space, and the state space are included in the code for simpl_env.py
+  attached to the SimpleEnv class.
+* The reward is 1 for each step survived and -1000 for death
+* An example, human-interface for the world is provided in _example.py_.  See the code for the keys to use.
+* To use the environment in your code, if your in the main project repo, you can refer to arkania as a package.
+  Again, see _example.py_ for how to import the environment.
+
+
 ## Features
 
 ### 1. Resources to be collected, used, consumed, or stored
