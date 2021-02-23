@@ -44,6 +44,13 @@ BEACH_N = 21
 CLIFF_E = 22
 CLIFF_SE = 23
 FOOD = 24
+HAND = 25
+WATER_IN_HAND = 26
+STONE_IN_HAND = 27
+FOOD_IN_HAND = 28
+
+NUM_SPRITES = 29
+
 
 PLANT = 101
 
@@ -74,7 +81,7 @@ class Tile(Geom):
 class Tileset:
     def __init__(self):
         self.tiles = []
-        for i in range(1, 25 + 1):
+        for i in range(1, NUM_SPRITES + 1):
             fname = f"arkania/graphics/sprites/Simple_Tiles{i}.png"
             self.tiles.append(pyglet.image.load(fname))
 
@@ -619,6 +626,19 @@ class SimpleEnv(gym.Env):
 
         # draw time scale
         # TODO: Timescales
+
+        #---------------------------------
+        # Draw what is in hand
+        #---------------------------------
+        hand_x, hand_y = 19, 10
+        self.tiles.draw(self.viewer, HAND, hand_x, hand_y)
+        in_hand = self.agent.what_is_in_hand()
+        if in_hand == 1:
+            self.tiles.draw(self.viewer, FOOD_IN_HAND, hand_x, hand_y)
+        if in_hand == 2:
+            self.tiles.draw(self.viewer, WATER_IN_HAND, hand_x, hand_y)
+        if in_hand == 3:
+            self.tiles.draw(self.viewer, STONE_IN_HAND, hand_x, hand_y)
 
         #---------------------------------
         # draw player stats:
