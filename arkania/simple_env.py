@@ -445,16 +445,15 @@ class SimpleEnv(gym.Env):
         self.tiles = Tileset()
         self.light = 1.0
         self.food_id = 0
+        self.season = 0
+        self.day = 0
+        self.time = 0
+
+        self.reset()
 
     #-----------------------------------------------------------------------------------------------
-    def reset(self):
-        self._cleanup()
-        self._init()
-
-    #-----------------------------------------------------------------------------------------------
-    def get_sight_matrix(self, agent):
+    def get_sight_matrix(self, agent, size=2):
         tile_map = [0, 6, 5, 1, 1, 1, 1, 1, 2, 2, 4, 3, 7, -1, 14, 13, 8, 9, 10, 11, -1, 1, 2, 2, 12, -99, -99]
-        size = 6
         smat = np.zeros((2 * size + 1, 2 * size + 1), dtype=int)
         for r in range(2 * size + 1):
             for c in range(2 * size + 1):
@@ -512,6 +511,15 @@ class SimpleEnv(gym.Env):
 
         return smat
 
+    def _get_state(self):
+        state = {'health': self.agent.health,
+                 'energy': self.agent.energy,
+                 'food': self.agent.food,
+                 'water': self.agent.water,
+                 'in_hand': self.agent.what_is_in_hand(),
+                 'sight': self.get_sight_matrix(self.agent)}
+        return state
+
     #-----------------------------------------------------------------------------------------------
     def step(self, action):
         """
@@ -557,12 +565,7 @@ class SimpleEnv(gym.Env):
         for f in self.foods:
             f.step()
 
-        state = {'health': self.agent.health,
-                 'energy': self.agent.energy,
-                 'food': self.agent.food,
-                 'water': self.agent.water,
-                 'in_hand': self.agent.what_is_in_hand(),
-                 'sight': self.get_sight_matrix(self.agent)}
+        state = self._get_state()
 
         # this can eventually be a log of information about 'why' different things happened in response to actions
         debug = {}
@@ -704,10 +707,12 @@ class SimpleEnv(gym.Env):
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
     #-----------------------------------------------------------------------------------------------
-    def _init(self):
+    def reset(self):
         """
         This actually does the initialization
         """
+
+        rnd.seed(42)
 
         self.season = 0
         self.day = 0
@@ -776,6 +781,8 @@ class SimpleEnv(gym.Env):
 
         # Empty at first, but can be filled as things are set down
         self.foods = []
+
+        return self._get_state()
 
     #-----------------------------------------------------------------------------------------------
     def _cleanup(self):
